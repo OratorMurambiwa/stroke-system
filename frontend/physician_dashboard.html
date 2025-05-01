@@ -78,8 +78,14 @@
         }
 
         let html = `
-          <h3>${data.name} (${data.age} yrs)</h3>
+          <p><strong>Name:</strong> ${data.name}</p>
+          <p><strong>Age:</strong> ${data.age}</p>
+          <p><strong>Gender:</strong> ${data.gender}</p>
           <p><strong>Chief Complaint:</strong> ${data.chief_complaint}</p>
+          <p><strong>Systolic BP:</strong> ${data.systolic_bp ?? "N/A"}</p>
+          <p><strong>Diastolic BP:</strong> ${data.diastolic_bp ?? "N/A"}</p>
+          <p><strong>Glucose:</strong> ${data.glucose ?? "N/A"} mg/dL</p>
+          <p><strong>INR:</strong> ${data.inr ?? "N/A"}</p>
         `;
 
         data.scans.forEach(scan => {

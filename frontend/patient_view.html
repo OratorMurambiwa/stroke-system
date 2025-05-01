@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Patient View</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #000000;
+      color: #FFFFFF;
+      display: flex;
+      justify-content: center;
+      padding-top: 50px;
+      min-height: 100vh;
+      margin: 0;
+    }
+    .container {
+      background-color: #FFFFFF;
+      color: #000000;
+      padding: 30px;
+      border-radius: 10px;
+      width: 90%;
+      max-width: 700px;
+    }
+    h2 {
+      color: #FDB927;
+      text-align: center;
+    }
+    img {
+      max-width: 100%;
+      margin-bottom: 20px;
+      border: 1px solid #ccc;
+    }
+    .eligible { color: green; font-weight: bold; }
+    .not-eligible { color: red; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Patient Stroke Summary</h2>
+    <div id="result"></div>
+  </div>
+  <script>
+    window.addEventListener("DOMContentLoaded", async () => {
+      const params = new URLSearchParams(window.location.search);
+      const code = params.get("code");
+      const result = document.getElementById("result");
+
+      if (!code) {
+        result.innerHTML = "<p style='color:red;'>Patient code not provided.</p>";
+        return;
+      }
+
+      try {
+        const res = await fetch(`/patients/${code}/scans`);
+        const data = await res.json();
+
+        if (!res.ok) {
+          result.innerHTML = `<p style='color:red;'>${data.detail}</p>`;
+          return;
+        }
+
+        let html = `
+          <p><strong>Name:</strong> ${data.name}</p>
+          <p><strong>Age:</strong> ${data.age}</p>
+          <p><strong>Gender:</strong> ${data.gender}</p>
+          <p><strong>Chief Complaint:</strong> ${data.chief_complaint}</p>
+          <p><strong>Systolic BP:</strong> ${data.systolic_bp ?? "N/A"}</p>
+          <p><strong>Diastolic BP:</strong> ${data.diastolic_bp ?? "N/A"}</p>
+          <p><strong>Glucose:</strong> ${data.glucose ?? "N/A"} mg/dL</p>
+          <p><strong>INR:</strong> ${data.inr ?? "N/A"}</p>
+        `;
+
+        if (data.scans.length > 0) {
+          const scan = data.scans[data.scans.length - 1];
+          const eligibleClass = scan.eligible ? "eligible" : "not-eligible";
+          html += `
+            <p><strong>Diagnosis:</strong> ${scan.diagnosis}</p>
+            <p class="${eligibleClass}"><strong>Eligibility:</strong> ${scan.eligible ? "✅ Eligible" : "❌ Not Eligible"}</p>
+            <p><strong>Reason:</strong> ${scan.eligibility_result}</p>
+            <img src="${scan.image_path}" alt="Scan Image">
+          `;
+        } else {
+          html += "<p>No scans uploaded yet.</p>";
+        }
+
+        result.innerHTML = html;
+      } catch (err) {
+        result.innerHTML = `<p style='color:red;'>Failed to load data.</p>`;
+      }
+    });
+  </script>
+</body>
+</html>

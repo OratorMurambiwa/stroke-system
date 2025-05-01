@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Physician Dashboard</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #000000;
+      color: #FFFFFF;
+      display: flex;
+      justify-content: center;
+      padding-top: 50px;
+      min-height: 100vh;
+      margin: 0;
+    }
+    .container {
+      background-color: #FFFFFF;
+      color: #000000;
+      padding: 30px;
+      border-radius: 10px;
+      width: 90%;
+      max-width: 800px;
+    }
+    h2, h3 {
+      color: #FDB927;
+      text-align: center;
+    }
+    img {
+      max-width: 100%;
+      margin-bottom: 20px;
+      border: 1px solid #ccc;
+    }
+    .eligible { color: green; font-weight: bold; }
+    .not-eligible { color: red; font-weight: bold; }
+    textarea {
+      width: 100%;
+      padding: 10px;
+      margin-top: 8px;
+      margin-bottom: 12px;
+      font-size: 14px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+    button {
+      background-color: #FDB927;
+      color: #000000;
+      font-weight: bold;
+      padding: 8px 14px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #d4a218;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Physician Dashboard</h2>
+    <label for="code">Enter Patient Code:</label>
+    <input type="text" id="code" placeholder="e.g., P001">
+    <button onclick="loadScans()">Search</button>
+    <div id="result" style="margin-top: 20px;"></div>
+  </div>
+  <script>
+    async function loadScans() {
+      const code = document.getElementById("code").value;
+      const result = document.getElementById("result");
+      try {
+        const res = await fetch(`/patients/${code}/scans`);
+        const data = await res.json();
+
+        if (!res.ok) {
+          result.innerHTML = `<p style='color:red;'>${data.detail}</p>`;
+          return;
+        }
+
+        let html = `
+          <h3>${data.name} (${data.age} yrs)</h3>
+          <p><strong>Chief Complaint:</strong> ${data.chief_complaint}</p>
+        `;
+
+        data.scans.forEach(scan => {
+          const eligibleClass = scan.eligible ? "eligible" : "not-eligible";
+          html += `
+            <p><strong>Scan ID:</strong> ${scan.scan_id}</p>
+            <p class="${eligibleClass}"><strong>Eligibility:</strong> ${scan.eligible ? "✅ Eligible" : "❌ Not Eligible"}</p>
+            <p><strong>Reason:</strong> ${scan.eligibility_result}</p>
+            <p><strong>Diagnosis:</strong> ${scan.diagnosis}</p>
+            <img src="${scan.image_path}" alt="Scan Image">
+            <form onsubmit="return submitComment(event, ${scan.scan_id})">
+              <label for="comment-${scan.scan_id}"><strong>Doctor's Comment:</strong></label>
+              <textarea id="comment-${scan.scan_id}" placeholder="Enter comment here..."></textarea>
+              <button type="submit">Submit Comment</button>
+            </form>
+            <hr>
+          `;
+        });
+
+        result.innerHTML = html;
+      } catch (err) {
+        result.innerHTML = `<p style='color:red;'>Error loading scans.</p>`;
+      }
+    }
+
+    async function submitComment(event, scanId) {
+      event.preventDefault();
+      const textarea = document.getElementById(`comment-${scanId}`);
+      const comment = textarea.value;
+      if (!comment.trim()) {
+        alert("Comment cannot be empty.");
+        return false;
+      }
+      const formData = new FormData();
+      formData.append("comment", comment);
+
+      try {
+        const res = await fetch(`/scans/${scanId}/comment`, {
+          method: "POST",
+          body: formData
+        });
+        if (res.ok) {
+          alert("Comment submitted successfully.");
+          textarea.value = "";
+        } else {
+          alert("Failed to submit comment.");
+        }
+      } catch (err) {
+        alert("Error submitting comment.");
+      }
+      return false;
+    }
+  </script>
+</body>
+</html>

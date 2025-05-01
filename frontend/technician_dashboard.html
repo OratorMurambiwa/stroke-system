@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Technician Dashboard</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #000000;
+      color: #FFFFFF;
+      display: flex;
+      justify-content: center;
+      padding-top: 50px;
+      min-height: 100vh;
+      margin: 0;
+    }
+
+    .container {
+      background-color: #FFFFFF;
+      color: #000000;
+      padding: 30px;
+      border-radius: 10px;
+      width: 90%;
+      max-width: 800px;
+    }
+
+    h2, h3 {
+      color: #FDB927;
+      text-align: center;
+    }
+
+    p {
+      margin: 6px 0;
+    }
+
+    img {
+      max-width: 100%;
+      height: auto;
+      border: 1px solid #ccc;
+      margin-top: 10px;
+      margin-bottom: 20px;
+    }
+
+    hr {
+      margin: 20px 0;
+    }
+
+    button {
+      background-color: #FDB927;
+      color: #000000;
+      font-weight: bold;
+      padding: 12px 20px;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      cursor: pointer;
+      margin: 10px;
+    }
+
+    button:hover {
+      background-color: #d4a218;
+    }
+
+    #output {
+      margin-top: 30px;
+    }
+
+    .eligible {
+      color: green;
+      font-weight: bold;
+    }
+
+    .not-eligible {
+      color: red;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Technician Dashboard</h2>
+
+    <button onclick="window.location.href='/upload-form'">Enter New Patient + Upload Scan</button>
+    <button onclick="loadPatients()">View Existing Patients</button>
+
+    <div id="output"></div>
+  </div>
+
+  <script>
+    async function loadPatients() {
+      const output = document.getElementById("output");
+      output.innerHTML = "Loading patients...";
+
+      try {
+        const res = await fetch("/patients/");
+        const patients = await res.json();
+
+        if (!res.ok || patients.length === 0) {
+          output.innerHTML = "<p>No patients found in the database.</p>";
+          return;
+        }
+
+        let html = "";
+        for (const p of patients) {
+          html += `
+            <h3>${p.name} (${p.age} yrs)</h3>
+            <p><strong>Gender:</strong> ${p.gender}</p>
+            <p><strong>Chief Complaint:</strong> ${p.chief_complaint}</p>
+            <p><strong>Systolic BP:</strong> ${p.systolic_bp ?? "N/A"}</p>
+            <p><strong>Diastolic BP:</strong> ${p.diastolic_bp ?? "N/A"}</p>
+            <p><strong>Glucose:</strong> ${p.glucose ?? "N/A"} mg/dL</p>
+            <p><strong>INR:</strong> ${p.inr ?? "N/A"}</p>
+            <p><strong>Patient Code:</strong> ${p.code}</p>
+          `;
+
+          try {
+            const scansRes = await fetch(`/patients/${p.code}/scans`);
+            const scansData = await scansRes.json();
+
+            if (scansRes.ok && scansData.scans && scansData.scans.length > 0) {
+              scansData.scans.forEach(scan => {
+                const eligibleClass = scan.eligible ? "eligible" : "not-eligible";
+                const eligibleText = scan.eligible ? "✅ Eligible for tPA" : "❌ Not Eligible for tPA";
+
+                html += `
+                  <p><strong>Scan ID:</strong> ${scan.scan_id}</p>
+                  <p class="${eligibleClass}"><strong>Eligibility:</strong> ${eligibleText}</p>
+                  <p><strong>Reason:</strong> ${scan.eligibility_result}</p>
+                  <p><strong>Diagnosis:</strong> ${scan.diagnosis}</p>
+                  <img src="${scan.image_path}" alt="Stroke Scan">
+                  <hr>
+                `;
+              });
+            } else {
+              html += `<p><em>No scans uploaded yet.</em></p><hr>`;
+            }
+          } catch (err) {
+            html += `<p><em>Could not load scans.</em></p><hr>`;
+          }
+        }
+
+        output.innerHTML = html;
+      } catch (err) {
+        output.innerHTML = `<p style="color:red;">Something went wrong. Try refreshing.</p>`;
+        console.error(err);
+      }
+    }
+  </script>
+</body>
+</html>

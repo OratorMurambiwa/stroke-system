@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Upload Stroke Scan</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #000000;
+      color: #FFFFFF;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+      padding-top: 50px;
+      margin: 0;
+    }
+    .container {
+      background-color: #FFFFFF;
+      color: #000000;
+      padding: 30px;
+      border-radius: 10px;
+      width: 90%;
+      max-width: 800px;
+    }
+    h2 {
+      color: #FDB927;
+      text-align: center;
+    }
+    label {
+      font-weight: 600;
+      margin-top: 15px;
+      display: block;
+    }
+    input, select, button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 6px;
+      margin-bottom: 12px;
+      font-size: 14px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+    button {
+      background-color: #FDB927;
+      color: #000000;
+      font-weight: bold;
+      border: none;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #d4a218;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Upload Stroke Scan</h2>
+    <form action="/upload-scan/" method="post" enctype="multipart/form-data">
+
+      <!-- Initial Assessment -->
+      <label>Patient Name:</label>
+      <input type="text" name="name" required>
+
+      <label>Age:</label>
+      <input type="number" name="age" required>
+
+      <label>Gender:</label>
+      <select name="gender" required>
+        <option value="Male">Male</option>
+        <option value="Female">Female</option>
+        <option value="Other">Other</option>
+      </select>
+
+      <label>Time Since Symptom Onset (in hours):</label>
+      <input type="number" name="hours_since_onset" required>
+
+      <label>CT/MRI Confirmed Ischemic Stroke?</label>
+      <select name="imaging_confirmed">
+        <option value="yes">Yes</option>
+        <option value="no">No</option>
+      </select>
+
+      <label>Consent Given by Patient or Legal Rep?</label>
+      <select name="consent">
+        <option value="yes">Yes</option>
+        <option value="no">No</option>
+      </select>
+
+      <!-- Inclusion Criteria -->
+      <label>NIHSS Score:</label>
+      <input type="number" name="nhiss_score" required>
+
+      <label>INR:</label>
+      <input type="number" name="inr" step="0.1" required>
+
+      <label>Heart Rate (bpm):</label>
+      <input type="number" name="heart_rate" required>
+
+      <label>Respiratory Rate (breaths/min):</label>
+      <input type="number" name="respiratory_rate" required>
+
+      <label>Temperature (°F):</label>
+      <input type="number" name="temperature" step="0.1" required>
+
+      <label>Oxygen Saturation (SpO2%):</label>
+      <input type="number" name="oxygen_saturation" required>
+
+      <!-- Exclusion Criteria -->
+      <label>Systolic BP:</label>
+      <input type="number" name="systolic_bp" required>
+
+      <label>Diastolic BP:</label>
+      <input type="number" name="diastolic_bp" required>
+
+      <label>Blood Glucose (mg/dL):</label>
+      <input type="number" name="glucose" step="0.1" required>
+
+      <label>Platelet Count (x1000/μL):</label>
+      <input type="number" name="platelet_count" required>
+
+      <label>Anticoagulant Use with INR ≥ 3?</label>
+      <select name="anticoagulant_risk">
+        <option value="no">No</option>
+        <option value="yes">Yes</option>
+      </select>
+
+      <label>Recent Head/Spinal Trauma (Last 3 Months)?</label>
+      <select name="recent_trauma">
+        <option value="no">No</option>
+        <option value="yes">Yes</option>
+      </select>
+
+      <label>Recent Stroke/Serious Head Injury?</label>
+      <select name="recent_stroke_or_injury">
+        <option value="no">No</option>
+        <option value="yes">Yes</option>
+      </select>
+
+      <label>Intracranial Hemorrhage, Tumor, or AVM?</label>
+      <select name="intracranial_issue">
+        <option value="no">No</option>
+        <option value="yes">Yes</option>
+      </select>
+
+      <label>Recent Myocardial Infarction (Heart Attack)?</label>
+      <select name="recent_mi">
+        <option value="no">No</option>
+        <option value="yes">Yes</option>
+      </select>
+
+      <label>Recent Surgery or Biopsy?</label>
+      <select name="recent_surgery">
+        <option value="no">No</option>
+        <option value="yes">Yes</option>
+      </select>
+
+      <!-- Patient Code and File Upload -->
+      <label>Patient Code (Share with Patient):</label>
+      <input type="text" name="code" required>
+
+      <label>Chief Complaint:</label>
+      <input type="text" name="chief_complaint" required>
+
+      <label>Upload Scan Image:</label>
+      <input type="file" name="scan" accept="image/*" required>
+
+      <button type="submit">Submit</button>
+    </form>
+  </div>
+</body>
+</html>

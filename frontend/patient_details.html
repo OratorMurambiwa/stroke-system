@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Patient Details - Stroke Detection System</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #000000;
+      color: #FFFFFF;
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .header-bar {
+      background-color: #F5F5DC; /* Cream background */
+      border-bottom: 3px solid #FDB927; /* Gold bottom border */
+      color: #000000; /* Dark text */
+      padding: 15px 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .system-name {
+      font-size: 24px;
+      font-weight: bold;
+      color: #000000;
+    }
+
+    .back-btn {
+      background-color: #FDB927;
+      color: #000000;
+      font-weight: bold;
+      padding: 8px 16px;
+      border: none;
+      border-radius: 4px;
+      font-size: 14px;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .back-btn:hover {
+      background-color: #d4a218;
+    }
+
+    .main-content {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      padding: 30px;
+    }
+
+    .patient-container {
+      background-color: #FFFFFF;
+      color: #000000;
+      padding: 30px;
+      border-radius: 12px;
+      width: 100%;
+      max-width: 1000px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .patient-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+      padding-bottom: 20px;
+      border-bottom: 2px solid #FDB927;
+    }
+
+    .patient-title {
+      font-size: 28px;
+      font-weight: bold;
+      color: #FDB927;
+    }
+
+    .patient-code {
+      font-family: monospace;
+      background-color: #f8f9fa;
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 16px;
+      font-weight: bold;
+      color: #333;
+    }
+
+    .patient-info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 30px;
+      margin-bottom: 30px;
+    }
+
+    .info-section {
+      background-color: #f8f9fa;
+      padding: 20px;
+      border-radius: 8px;
+      border-left: 4px solid #FDB927;
+    }
+
+    .section-title {
+      font-size: 18px;
+      font-weight: bold;
+      color: #333;
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .info-item {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      padding: 5px 0;
+    }
+
+    .info-label {
+      font-weight: 600;
+      color: #666;
+    }
+
+    .info-value {
+      color: #333;
+      font-weight: 500;
+    }
+
+    .scans-section {
+      margin-top: 30px;
+    }
+
+    .scan-card {
+      background-color: #f8f9fa;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 20px;
+      border-left: 4px solid #FDB927;
+    }
+
+    .scan-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+
+    .scan-id {
+      font-size: 16px;
+      font-weight: bold;
+      color: #333;
+    }
+
+    .scan-status {
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .status-eligible {
+      background-color: #d4edda;
+      color: #155724;
+    }
+
+    .status-not-eligible {
+      background-color: #f8d7da;
+      color: #721c24;
+    }
+
+    .status-pending {
+      background-color: #fff3cd;
+      color: #856404;
+    }
+
+    .scan-image {
+      max-width: 100%;
+      height: auto;
+      border-radius: 8px;
+      margin-top: 15px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .loading {
+      text-align: center;
+      padding: 40px;
+      color: #666;
+    }
+
+    .error {
+      text-align: center;
+      padding: 40px;
+      color: #dc3545;
+      background-color: #f8d7da;
+      border-radius: 8px;
+      margin: 20px 0;
+    }
+
+    /* Dark theme styles */
+    body.dark-theme {
+      background-color: #1a1a1a;
+      color: #FFFFFF;
+    }
+
+    body.dark-theme .header-bar {
+      background-color: #2d2d2d;
+      color: #FFFFFF;
+    }
+
+    body.dark-theme .system-name {
+      color: #FFFFFF;
+    }
+
+    body.dark-theme .patient-container {
+      background-color: #2d2d2d;
+      color: #FFFFFF;
+    }
+
+    body.dark-theme .info-section {
+      background-color: #404040;
+    }
+
+    body.dark-theme .section-title {
+      color: #FFFFFF;
+    }
+
+    body.dark-theme .info-label {
+      color: #ccc;
+    }
+
+    body.dark-theme .info-value {
+      color: #FFFFFF;
+    }
+
+    body.dark-theme .patient-code {
+      background-color: #404040;
+      color: #FFFFFF;
+    }
+
+    body.dark-theme .scan-card {
+      background-color: #404040;
+    }
+
+    body.dark-theme .scan-id {
+      color: #FFFFFF;
+    }
+  </style>
+</head>
+<body>
+  <div class="header-bar">
+    <div class="header-left">
+      <div class="system-name">Stroke Detection System</div>
+    </div>
+    <a href="/technician-dashboard" class="back-btn">← Back to Dashboard</a>
+  </div>
+
+  <div class="main-content">
+    <div class="patient-container">
+      <div id="loading" class="loading">
+        <h3>Loading patient details...</h3>
+      </div>
+      
+      <div id="error" class="error" style="display: none;">
+        <h3>Error loading patient details</h3>
+        <p>Please try again or contact support.</p>
+      </div>
+
+      <div id="patient-content" style="display: none;">
+        <div class="patient-header">
+          <div class="patient-title" id="patientName">Patient Name</div>
+          <div class="patient-code" id="patientCode">P000</div>
+        </div>
+
+        <div class="patient-info-grid">
+          <div class="info-section">
+            <div class="section-title">👤 Basic Information</div>
+            <div class="info-item">
+              <span class="info-label">Age:</span>
+              <span class="info-value" id="patientAge">-</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Gender:</span>
+              <span class="info-value" id="patientGender">-</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Chief Complaint:</span>
+              <span class="info-value" id="patientComplaint">-</span>
+            </div>
+          </div>
+
+          <div class="info-section">
+            <div class="section-title">🩺 Vital Signs</div>
+            <div class="info-item">
+              <span class="info-label">Systolic BP:</span>
+              <span class="info-value" id="systolicBP">-</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Diastolic BP:</span>
+              <span class="info-value" id="diastolicBP">-</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Glucose:</span>
+              <span class="info-value" id="glucose">-</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">INR:</span>
+              <span class="info-value" id="inr">-</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="scans-section">
+          <div class="section-title">🧠 Brain Scans</div>
+          <div id="scans-container">
+            <!-- Scans will be loaded here -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Get patient code from URL parameters
+    function getPatientCode() {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get('code');
+    }
+
+    // Load patient details
+    async function loadPatientDetails() {
+      const patientCode = getPatientCode();
+      if (!patientCode) {
+        showError('No patient code provided');
+        return;
+      }
+
+      try {
+        const response = await fetch(`/patients/${patientCode}`);
+        if (!response.ok) {
+          throw new Error('Patient not found');
+        }
+
+        const patient = await response.json();
+        displayPatientDetails(patient);
+      } catch (error) {
+        console.error('Error loading patient:', error);
+        showError('Failed to load patient details');
+      }
+    }
+
+    // Display patient details
+    function displayPatientDetails(patient) {
+      // Hide loading, show content
+      document.getElementById('loading').style.display = 'none';
+      document.getElementById('patient-content').style.display = 'block';
+
+      // Update patient header
+      document.getElementById('patientName').textContent = patient.name;
+      document.getElementById('patientCode').textContent = patient.code;
+
+      // Update basic information
+      document.getElementById('patientAge').textContent = patient.age || 'N/A';
+      document.getElementById('patientGender').textContent = patient.gender || 'N/A';
+      document.getElementById('patientComplaint').textContent = patient.chief_complaint || 'N/A';
+
+      // Update vital signs
+      document.getElementById('systolicBP').textContent = patient.systolic_bp ? `${patient.systolic_bp} mmHg` : 'N/A';
+      document.getElementById('diastolicBP').textContent = patient.diastolic_bp ? `${patient.diastolic_bp} mmHg` : 'N/A';
+      document.getElementById('glucose').textContent = patient.glucose ? `${patient.glucose} mg/dL` : 'N/A';
+      document.getElementById('inr').textContent = patient.inr || 'N/A';
+
+      // Display scans
+      displayScans(patient.scans || []);
+    }
+
+    // Display patient scans
+    function displayScans(scans) {
+      const scansContainer = document.getElementById('scans-container');
+      
+      if (scans.length === 0) {
+        scansContainer.innerHTML = '<p style="text-align: center; color: #666; padding: 20px;">No scans available for this patient.</p>';
+        return;
+      }
+
+      let html = '';
+      scans.forEach(scan => {
+        const statusClass = scan.eligible === true ? 'status-eligible' : 
+                           scan.eligible === false ? 'status-not-eligible' : 
+                           'status-pending';
+        const statusText = scan.eligible === true ? 'Eligible' : 
+                          scan.eligible === false ? 'Not Eligible' : 
+                          'Pending';
+
+        html += `
+          <div class="scan-card">
+            <div class="scan-header">
+              <div class="scan-id">Scan #${scan.scan_id}</div>
+              <div class="scan-status ${statusClass}">${statusText}</div>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Diagnosis:</span>
+              <span class="info-value">${scan.diagnosis || 'N/A'}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Eligibility Result:</span>
+              <span class="info-value">${scan.eligibility_result || 'N/A'}</span>
+            </div>
+            ${scan.image_path ? `<img src="${scan.image_path}" alt="Brain Scan" class="scan-image">` : ''}
+          </div>
+        `;
+      });
+
+      scansContainer.innerHTML = html;
+    }
+
+    // Show error message
+    function showError(message) {
+      document.getElementById('loading').style.display = 'none';
+      document.getElementById('error').style.display = 'block';
+      document.getElementById('error').querySelector('h3').textContent = message;
+    }
+
+    // Load patient details on page load
+    document.addEventListener('DOMContentLoaded', loadPatientDetails);
+  </script>
+</body>
+</html>

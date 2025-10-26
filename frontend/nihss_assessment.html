@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NIHSS Assessment - Stroke Detection System</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #000000;
+      color: #FFFFFF;
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .header-bar {
+      background-color: #F5F5DC;
+      border-bottom: 3px solid #FDB927;
+      color: #000000;
+      padding: 15px 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .system-name {
+      font-size: 24px;
+      font-weight: bold;
+      color: #000000;
+    }
+
+    .back-btn {
+      background-color: #FDB927;
+      color: #000000;
+      font-weight: bold;
+      padding: 8px 16px;
+      border: none;
+      border-radius: 4px;
+      font-size: 14px;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .back-btn:hover {
+      background-color: #d4a218;
+    }
+
+    .main-content {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 40px 20px;
+      overflow-y: auto;
+    }
+
+    .form-container {
+      background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+      border-radius: 12px;
+      padding: 40px;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+      border-left: 5px solid #FDB927;
+      width: 100%;
+      max-width: 800px;
+      color: #333;
+    }
+
+    .form-header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .form-title {
+      color: #FDB927;
+      font-size: 28px;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+
+    .form-subtitle {
+      color: #666;
+      font-size: 14px;
+    }
+
+    .patient-info {
+      background-color: #f8f9fa;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 30px;
+      border-left: 4px solid #FDB927;
+    }
+
+    .patient-info h3 {
+      color: #FDB927;
+      margin-top: 0;
+      margin-bottom: 15px;
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .info-item {
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .info-label {
+      font-weight: 600;
+      color: #666;
+    }
+
+    .info-value {
+      color: #333;
+    }
+
+    .nihss-section {
+      background-color: #f8f9fa;
+      padding: 25px;
+      border-radius: 8px;
+      margin-bottom: 25px;
+      border-left: 4px solid #FDB927;
+    }
+
+    .nihss-section h3 {
+      color: #FDB927;
+      margin-top: 0;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    .nihss-item {
+      margin-bottom: 25px;
+      padding: 20px;
+      background-color: white;
+      border-radius: 8px;
+      border: 1px solid #e0e0e0;
+    }
+
+    .nihss-item h4 {
+      color: #333;
+      margin-top: 0;
+      margin-bottom: 15px;
+      font-size: 16px;
+    }
+
+    .nihss-item p {
+      color: #666;
+      font-size: 14px;
+      margin-bottom: 15px;
+      line-height: 1.4;
+    }
+
+    .score-options {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 10px;
+    }
+
+    .score-option {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px;
+      border: 2px solid #e0e0e0;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .score-option:hover {
+      border-color: #FDB927;
+      background-color: #fff8e1;
+    }
+
+    .score-option.selected {
+      border-color: #FDB927;
+      background-color: #FDB927;
+      color: #000000;
+    }
+
+    .score-option input[type="radio"] {
+      margin: 0;
+    }
+
+    .score-option label {
+      margin: 0;
+      cursor: pointer;
+      font-weight: 500;
+    }
+
+    .total-score {
+      background-color: #FDB927;
+      color: #000000;
+      padding: 20px;
+      border-radius: 8px;
+      text-align: center;
+      margin-bottom: 25px;
+    }
+
+    .total-score h3 {
+      margin: 0 0 10px 0;
+      font-size: 24px;
+    }
+
+    .total-score .score-value {
+      font-size: 36px;
+      font-weight: bold;
+    }
+
+    .form-buttons {
+      display: flex;
+      gap: 15px;
+      margin-top: 30px;
+    }
+
+    .btn-primary {
+      flex: 1;
+      background: linear-gradient(135deg, #FDB927 0%, #d4a218 100%);
+      color: #000000;
+      font-weight: bold;
+      padding: 14px 20px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .btn-primary:hover {
+      background: linear-gradient(135deg, #d4a218 0%, #b8941f 100%);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(253, 185, 39, 0.3);
+    }
+
+    .btn-secondary {
+      background: #6c757d;
+      color: white;
+      font-weight: bold;
+      padding: 14px 20px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .btn-secondary:hover {
+      background: #5a6268;
+    }
+
+    .success-message {
+      background-color: #d4edda;
+      color: #155724;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      border-left: 4px solid #28a745;
+    }
+
+    /* Responsive design */
+    @media (max-width: 768px) {
+      .form-container {
+        padding: 30px 20px;
+        margin: 20px;
+      }
+
+      .form-title {
+        font-size: 24px;
+      }
+
+      .info-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .score-options {
+        grid-template-columns: 1fr;
+      }
+
+      .form-buttons {
+        flex-direction: column;
+      }
+
+      .btn-primary,
+      .btn-secondary {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="header-bar">
+    <div class="header-left">
+      <div class="system-name">Stroke Detection System</div>
+    </div>
+    <div class="header-right">
+      <a href="/technician-dashboard" class="back-btn">
+        ← Back to Dashboard
+      </a>
+    </div>
+  </div>
+
+  <div class="main-content">
+    <div class="form-container">
+      <div class="form-header">
+        <h1 class="form-title">🧠 NIHSS Assessment</h1>
+        <p class="form-subtitle">National Institutes of Health Stroke Scale</p>
+      </div>
+
+      <div class="success-message">
+        ✅ Patient vitals saved successfully!
+      </div>
+
+      <div class="patient-info" id="patientInfo">
+        <h3>Patient Information</h3>
+        <div class="info-grid">
+          <div class="info-item">
+            <span class="info-label">Patient Code:</span>
+            <span class="info-value" id="patientCode">Loading...</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Name:</span>
+            <span class="info-value" id="patientName">Loading...</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Age:</span>
+            <span class="info-value" id="patientAge">Loading...</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Gender:</span>
+            <span class="info-value" id="patientGender">Loading...</span>
+          </div>
+        </div>
+      </div>
+
+      <form id="nihssForm">
+        <div class="nihss-section">
+          <h3>NIHSS Assessment Items</h3>
+          
+          <!-- Level of Consciousness -->
+          <div class="nihss-item">
+            <h4>1a. Level of Consciousness</h4>
+            <p>Assess the patient's level of consciousness</p>
+            <div class="score-options">
+              <div class="score-option" data-score="0">
+                <input type="radio" name="consciousness" value="0" id="consciousness_0">
+                <label for="consciousness_0">0 - Alert</label>
+              </div>
+              <div class="score-option" data-score="1">
+                <input type="radio" name="consciousness" value="1" id="consciousness_1">
+                <label for="consciousness_1">1 - Drowsy</label>
+              </div>
+              <div class="score-option" data-score="2">
+                <input type="radio" name="consciousness" value="2" id="consciousness_2">
+                <label for="consciousness_2">2 - Stuporous</label>
+              </div>
+              <div class="score-option" data-score="3">
+                <input type="radio" name="consciousness" value="3" id="consciousness_3">
+                <label for="consciousness_3">3 - Coma</label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Best Gaze -->
+          <div class="nihss-item">
+            <h4>2. Best Gaze</h4>
+            <p>Test horizontal eye movement</p>
+            <div class="score-options">
+              <div class="score-option" data-score="0">
+                <input type="radio" name="gaze" value="0" id="gaze_0">
+                <label for="gaze_0">0 - Normal</label>
+              </div>
+              <div class="score-option" data-score="1">
+                <input type="radio" name="gaze" value="1" id="gaze_1">
+                <label for="gaze_1">1 - Partial gaze palsy</label>
+              </div>
+              <div class="score-option" data-score="2">
+                <input type="radio" name="gaze" value="2" id="gaze_2">
+                <label for="gaze_2">2 - Forced deviation</label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Visual Fields -->
+          <div class="nihss-item">
+            <h4>3. Visual Fields</h4>
+            <p>Test visual fields by confrontation</p>
+            <div class="score-options">
+              <div class="score-option" data-score="0">
+                <input type="radio" name="visual" value="0" id="visual_0">
+                <label for="visual_0">0 - No visual loss</label>
+              </div>
+              <div class="score-option" data-score="1">
+                <input type="radio" name="visual" value="1" id="visual_1">
+                <label for="visual_1">1 - Partial hemianopia</label>
+              </div>
+              <div class="score-option" data-score="2">
+                <input type="radio" name="visual" value="2" id="visual_2">
+                <label for="visual_2">2 - Complete hemianopia</label>
+              </div>
+              <div class="score-option" data-score="3">
+                <input type="radio" name="visual" value="3" id="visual_3">
+                <label for="visual_3">3 - Bilateral hemianopia</label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Facial Palsy -->
+          <div class="nihss-item">
+            <h4>4. Facial Palsy</h4>
+            <p>Ask patient to show teeth or raise eyebrows</p>
+            <div class="score-options">
+              <div class="score-option" data-score="0">
+                <input type="radio" name="facial" value="0" id="facial_0">
+                <label for="facial_0">0 - Normal</label>
+              </div>
+              <div class="score-option" data-score="1">
+                <input type="radio" name="facial" value="1" id="facial_1">
+                <label for="facial_1">1 - Minor paralysis</label>
+              </div>
+              <div class="score-option" data-score="2">
+                <input type="radio" name="facial" value="2" id="facial_2">
+                <label for="facial_2">2 - Partial paralysis</label>
+              </div>
+              <div class="score-option" data-score="3">
+                <input type="radio" name="facial" value="3" id="facial_3">
+                <label for="facial_3">3 - Complete paralysis</label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Motor Arm -->
+          <div class="nihss-item">
+            <h4>5. Motor Arm (Left)</h4>
+            <p>Test arm strength - hold arm at 90° for 10 seconds</p>
+            <div class="score-options">
+              <div class="score-option" data-score="0">
+                <input type="radio" name="motorArmLeft" value="0" id="motorArmLeft_0">
+                <label for="motorArmLeft_0">0 - No drift</label>
+              </div>
+              <div class="score-option" data-score="1">
+                <input type="radio" name="motorArmLeft" value="1" id="motorArmLeft_1">
+                <label for="motorArmLeft_1">1 - Drift</label>
+              </div>
+              <div class="score-option" data-score="2">
+                <input type="radio" name="motorArmLeft" value="2" id="motorArmLeft_2">
+                <label for="motorArmLeft_2">2 - Cannot resist</label>
+              </div>
+              <div class="score-option" data-score="3">
+                <input type="radio" name="motorArmLeft" value="3" id="motorArmLeft_3">
+                <label for="motorArmLeft_3">3 - No effort</label>
+              </div>
+              <div class="score-option" data-score="4">
+                <input type="radio" name="motorArmLeft" value="4" id="motorArmLeft_4">
+                <label for="motorArmLeft_4">4 - No movement</label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Motor Arm Right -->
+          <div class="nihss-item">
+            <h4>6. Motor Arm (Right)</h4>
+            <p>Test arm strength - hold arm at 90° for 10 seconds</p>
+            <div class="score-options">
+              <div class="score-option" data-score="0">
+                <input type="radio" name="motorArmRight" value="0" id="motorArmRight_0">
+                <label for="motorArmRight_0">0 - No drift</label>
+              </div>
+              <div class="score-option" data-score="1">
+                <input type="radio" name="motorArmRight" value="1" id="motorArmRight_1">
+                <label for="motorArmRight_1">1 - Drift</label>
+              </div>
+              <div class="score-option" data-score="2">
+                <input type="radio" name="motorArmRight" value="2" id="motorArmRight_2">
+                <label for="motorArmRight_2">2 - Cannot resist</label>
+              </div>
+              <div class="score-option" data-score="3">
+                <input type="radio" name="motorArmRight" value="3" id="motorArmRight_3">
+                <label for="motorArmRight_3">3 - No effort</label>
+              </div>
+              <div class="score-option" data-score="4">
+                <input type="radio" name="motorArmRight" value="4" id="motorArmRight_4">
+                <label for="motorArmRight_4">4 - No movement</label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Motor Leg -->
+          <div class="nihss-item">
+            <h4>7. Motor Leg (Left)</h4>
+            <p>Test leg strength - hold leg at 30° for 5 seconds</p>
+            <div class="score-options">
+              <div class="score-option" data-score="0">
+                <input type="radio" name="motorLegLeft" value="0" id="motorLegLeft_0">
+                <label for="motorLegLeft_0">0 - No drift</label>
+              </div>
+              <div class="score-option" data-score="1">
+                <input type="radio" name="motorLegLeft" value="1" id="motorLegLeft_1">
+                <label for="motorLegLeft_1">1 - Drift</label>
+              </div>
+              <div class="score-option" data-score="2">
+                <input type="radio" name="motorLegLeft" value="2" id="motorLegLeft_2">
+                <label for="motorLegLeft_2">2 - Cannot resist</label>
+              </div>
+              <div class="score-option" data-score="3">
+                <input type="radio" name="motorLegLeft" value="3" id="motorLegLeft_3">
+                <label for="motorLegLeft_3">3 - No effort</label>
+              </div>
+              <div class="score-option" data-score="4">
+                <input type="radio" name="motorLegLeft" value="4" id="motorLegLeft_4">
+                <label for="motorLegLeft_4">4 - No movement</label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Motor Leg Right -->
+          <div class="nihss-item">
+            <h4>8. Motor Leg (Right)</h4>
+            <p>Test leg strength - hold leg at 30° for 5 seconds</p>
+            <div class="score-options">
+              <div class="score-option" data-score="0">
+                <input type="radio" name="motorLegRight" value="0" id="motorLegRight_0">
+                <label for="motorLegRight_0">0 - No drift</label>
+              </div>
+              <div class="score-option" data-score="1">
+                <input type="radio" name="motorLegRight" value="1" id="motorLegRight_1">
+                <label for="motorLegRight_1">1 - Drift</label>
+              </div>
+              <div class="score-option" data-score="2">
+                <input type="radio" name="motorLegRight" value="2" id="motorLegRight_2">
+                <label for="motorLegRight_2">2 - Cannot resist</label>
+              </div>
+              <div class="score-option" data-score="3">
+                <input type="radio" name="motorLegRight" value="3" id="motorLegRight_3">
+                <label for="motorLegRight_3">3 - No effort</label>
+              </div>
+              <div class="score-option" data-score="4">
+                <input type="radio" name="motorLegRight" value="4" id="motorLegRight_4">
+                <label for="motorLegRight_4">4 - No movement</label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Ataxia -->
+          <div class="nihss-item">
+            <h4>9. Ataxia</h4>
+            <p>Test coordination - finger-nose-finger or heel-shin test</p>
+            <div class="score-options">
+              <div class="score-option" data-score="0">
+                <input type="radio" name="ataxia" value="0" id="ataxia_0">
+                <label for="ataxia_0">0 - Absent</label>
+              </div>
+              <div class="score-option" data-score="1">
+                <input type="radio" name="ataxia" value="1" id="ataxia_1">
+                <label for="ataxia_1">1 - Present</label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Sensory -->
+          <div class="nihss-item">
+            <h4>10. Sensory</h4>
+            <p>Test sensation with pinprick</p>
+            <div class="score-options">
+              <div class="score-option" data-score="0">
+                <input type="radio" name="sensory" value="0" id="sensory_0">
+                <label for="sensory_0">0 - Normal</label>
+              </div>
+              <div class="score-option" data-score="1">
+                <input type="radio" name="sensory" value="1" id="sensory_1">
+                <label for="sensory_1">1 - Mild loss</label>
+              </div>
+              <div class="score-option" data-score="2">
+                <input type="radio" name="sensory" value="2" id="sensory_2">
+                <label for="sensory_2">2 - Severe loss</label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Language -->
+          <div class="nihss-item">
+            <h4>11. Language</h4>
+            <p>Test language comprehension and expression</p>
+            <div class="score-options">
+              <div class="score-option" data-score="0">
+                <input type="radio" name="language" value="0" id="language_0">
+                <label for="language_0">0 - Normal</label>
+              </div>
+              <div class="score-option" data-score="1">
+                <input type="radio" name="language" value="1" id="language_1">
+                <label for="language_1">1 - Mild aphasia</label>
+              </div>
+              <div class="score-option" data-score="2">
+                <input type="radio" name="language" value="2" id="language_2">
+                <label for="language_2">2 - Severe aphasia</label>
+              </div>
+              <div class="score-option" data-score="3">
+                <input type="radio" name="language" value="3" id="language_3">
+                <label for="language_3">3 - Mute</label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Dysarthria -->
+          <div class="nihss-item">
+            <h4>12. Dysarthria</h4>
+            <p>Test speech clarity</p>
+            <div class="score-options">
+              <div class="score-option" data-score="0">
+                <input type="radio" name="dysarthria" value="0" id="dysarthria_0">
+                <label for="dysarthria_0">0 - Normal</label>
+              </div>
+              <div class="score-option" data-score="1">
+                <input type="radio" name="dysarthria" value="1" id="dysarthria_1">
+                <label for="dysarthria_1">1 - Mild</label>
+              </div>
+              <div class="score-option" data-score="2">
+                <input type="radio" name="dysarthria" value="2" id="dysarthria_2">
+                <label for="dysarthria_2">2 - Severe</label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Extinction/Inattention -->
+          <div class="nihss-item">
+            <h4>13. Extinction/Inattention</h4>
+            <p>Test for neglect</p>
+            <div class="score-options">
+              <div class="score-option" data-score="0">
+                <input type="radio" name="extinction" value="0" id="extinction_0">
+                <label for="extinction_0">0 - Normal</label>
+              </div>
+              <div class="score-option" data-score="1">
+                <input type="radio" name="extinction" value="1" id="extinction_1">
+                <label for="extinction_1">1 - Partial neglect</label>
+              </div>
+              <div class="score-option" data-score="2">
+                <input type="radio" name="extinction" value="2" id="extinction_2">
+                <label for="extinction_2">2 - Complete neglect</label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="total-score">
+          <h3>Total NIHSS Score</h3>
+          <div class="score-value" id="totalScore">0</div>
+          <p id="scoreInterpretation">Normal</p>
+        </div>
+
+        <div class="form-buttons">
+          <button type="submit" class="btn-primary">
+            Save NIHSS & Continue to Scan Upload
+          </button>
+          <button type="button" class="btn-secondary" onclick="goBack()">
+            Cancel
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // Get patient code from URL parameters
+    function getPatientCodeFromURL() {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get('patient');
+    }
+
+    // Load patient information
+    async function loadPatientInfo() {
+      const patientCode = getPatientCodeFromURL();
+      
+      if (!patientCode) {
+        alert('No patient code provided. Redirecting to dashboard.');
+        window.location.href = '/technician-dashboard';
+        return;
+      }
+
+      try {
+        const response = await fetch(`/api/patients/${patientCode}`);
+        if (response.ok) {
+          const patient = await response.json();
+          
+          // Update patient info display
+          document.getElementById('patientCode').textContent = patient.code;
+          document.getElementById('patientName').textContent = patient.name;
+          document.getElementById('patientAge').textContent = patient.age;
+          document.getElementById('patientGender').textContent = patient.gender;
+          
+        } else {
+          throw new Error('Patient not found');
+        }
+      } catch (error) {
+        console.error('Error loading patient:', error);
+        alert('Error loading patient information. Redirecting to dashboard.');
+        window.location.href = '/technician-dashboard';
+      }
+    }
+
+    // Calculate total NIHSS score
+    function calculateTotalScore() {
+      const inputs = document.querySelectorAll('input[type="radio"]:checked');
+      let total = 0;
+      
+      inputs.forEach(input => {
+        total += parseInt(input.value);
+      });
+      
+      document.getElementById('totalScore').textContent = total;
+      
+      // Update interpretation
+      const interpretation = document.getElementById('scoreInterpretation');
+      if (total === 0) {
+        interpretation.textContent = 'Normal';
+      } else if (total <= 4) {
+        interpretation.textContent = 'Minor stroke';
+      } else if (total <= 15) {
+        interpretation.textContent = 'Moderate stroke';
+      } else {
+        interpretation.textContent = 'Severe stroke';
+      }
+    }
+
+    // Add event listeners for score options
+    function setupScoreOptions() {
+      const scoreOptions = document.querySelectorAll('.score-option');
+      
+      scoreOptions.forEach(option => {
+        option.addEventListener('click', function() {
+          // Remove selected class from siblings
+          const siblings = this.parentNode.querySelectorAll('.score-option');
+          siblings.forEach(sibling => sibling.classList.remove('selected'));
+          
+          // Add selected class to clicked option
+          this.classList.add('selected');
+          
+          // Check the radio button
+          const radio = this.querySelector('input[type="radio"]');
+          radio.checked = true;
+          
+          // Recalculate total score
+          calculateTotalScore();
+        });
+      });
+    }
+
+    // Handle form submission
+    document.getElementById('nihssForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      const patientCode = getPatientCodeFromURL();
+      if (!patientCode) {
+        alert('No patient code available');
+        return;
+      }
+
+      try {
+        const formData = {
+          consciousness: parseInt(document.querySelector('input[name="consciousness"]:checked')?.value || 0),
+          gaze: parseInt(document.querySelector('input[name="gaze"]:checked')?.value || 0),
+          visual: parseInt(document.querySelector('input[name="visual"]:checked')?.value || 0),
+          facial: parseInt(document.querySelector('input[name="facial"]:checked')?.value || 0),
+          motorArmLeft: parseInt(document.querySelector('input[name="motorArmLeft"]:checked')?.value || 0),
+          motorArmRight: parseInt(document.querySelector('input[name="motorArmRight"]:checked')?.value || 0),
+          motorLegLeft: parseInt(document.querySelector('input[name="motorLegLeft"]:checked')?.value || 0),
+          motorLegRight: parseInt(document.querySelector('input[name="motorLegRight"]:checked')?.value || 0),
+          ataxia: parseInt(document.querySelector('input[name="ataxia"]:checked')?.value || 0),
+          sensory: parseInt(document.querySelector('input[name="sensory"]:checked')?.value || 0),
+          language: parseInt(document.querySelector('input[name="language"]:checked')?.value || 0),
+          dysarthria: parseInt(document.querySelector('input[name="dysarthria"]:checked')?.value || 0),
+          extinction: parseInt(document.querySelector('input[name="extinction"]:checked')?.value || 0),
+          total_score: parseInt(document.getElementById('totalScore').textContent)
+        };
+
+        const response = await fetch(`/api/patients/${patientCode}/nihss`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(formData)
+        });
+
+        if (response.ok) {
+          // Redirect to upload form with patient code
+          window.location.href = `/upload-form?patient=${patientCode}`;
+        } else {
+          const errorData = await response.json();
+          throw new Error(errorData.detail || 'Failed to save NIHSS assessment');
+        }
+
+      } catch (error) {
+        console.error('Error saving NIHSS assessment:', error);
+        alert('Failed to save NIHSS assessment. Please try again.');
+      }
+    });
+
+    // Go back function
+    function goBack() {
+      if (confirm('Are you sure you want to cancel? Any entered data will be lost.')) {
+        window.location.href = '/technician-dashboard';
+      }
+    }
+
+    // Initialize page
+    document.addEventListener('DOMContentLoaded', function() {
+      loadPatientInfo();
+      setupScoreOptions();
+      calculateTotalScore();
+    });
+  </script>
+</body>
+</html>

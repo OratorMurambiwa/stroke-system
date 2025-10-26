@@ -1,0 +1,931 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patient Dashboard - GSU Stroke Support System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #000000;
+            color: #FFFFFF;
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        .header-bar {
+            background-color: #F5F5DC; /* Cream background */
+            border-bottom: 3px solid #FDB927; /* Gold bottom border */
+            color: #000000; /* Dark text */
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .system-name {
+            font-size: 24px;
+            font-weight: bold;
+            color: #000000;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .theme-toggle {
+            background-color: #FDB927;
+            color: #000000;
+            font-weight: bold;
+            padding: 8px 12px;
+            border: none;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .theme-toggle:hover {
+            background-color: #d4a218;
+        }
+
+        .logout-btn {
+            background-color: #FDB927;
+            color: #000000;
+            font-weight: bold;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .logout-btn:hover {
+            background-color: #d4a218;
+        }
+
+        /* Dark theme styles */
+        body.dark-theme {
+            background-color: #1a1a1a;
+            color: #FFFFFF;
+        }
+
+        body.dark-theme .header-bar {
+            background-color: #2d2d2d;
+            color: #FFFFFF;
+        }
+
+        body.dark-theme .system-name {
+            color: #FFFFFF;
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            width: 100%;
+            padding: 20px;
+        }
+
+        .patient-code-input {
+            background-color: #F5F5DC;
+            border-radius: 10px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .patient-code-input h2 {
+            color: #000000;
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
+
+        .patient-code-input p {
+            color: #333333;
+            font-size: 1rem;
+            margin-bottom: 25px;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .input-group input {
+            padding: 12px 20px;
+            border: 2px solid #ccc;
+            border-radius: 6px;
+            font-size: 16px;
+            width: 300px;
+            transition: all 0.3s ease;
+            background-color: #ffffff;
+            color: #000000;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #FDB927;
+            box-shadow: 0 0 0 3px rgba(253, 185, 39, 0.1);
+        }
+
+        .btn {
+            padding: 12px 30px;
+            background-color: #FDB927;
+            color: #000000;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            background-color: #d4a218;
+            transform: translateY(-2px);
+        }
+
+        .dashboard-content {
+            display: none;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background-color: #F5F5DC;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            border: 1px solid #e0e0e0;
+        }
+
+        .card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .card h3 {
+            color: #000000;
+            font-size: 1.4rem;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #FDB927;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: bold;
+        }
+
+        .card h3::before {
+            content: '';
+            width: 4px;
+            height: 20px;
+            background-color: #FDB927;
+            border-radius: 2px;
+        }
+
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .info-item:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: #333333;
+        }
+
+        .info-value {
+            color: #000000;
+            font-weight: 500;
+        }
+
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-eligible {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .status-not-eligible {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        .status-pending {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+
+        .status-reviewed {
+            background-color: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .recommendations-section {
+            background-color: #F5F5DC;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+            margin-top: 30px;
+            border: 1px solid #e0e0e0;
+        }
+
+        .recommendations-section h2 {
+            color: #000000;
+            font-size: 2rem;
+            margin-bottom: 25px;
+            text-align: center;
+            position: relative;
+            font-weight: bold;
+        }
+
+        .recommendations-section h2::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 3px;
+            background-color: #FDB927;
+            border-radius: 2px;
+        }
+
+        .treatment-plan {
+            background-color: #ffffff;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-left: 4px solid #FDB927;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .treatment-plan h4 {
+            color: #000000;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        .treatment-plan p {
+            color: #333333;
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+
+        .plan-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #e0e0e0;
+            font-size: 0.9rem;
+            color: #666666;
+        }
+
+        /* Dark theme styles */
+        body.dark-theme .patient-code-input {
+            background-color: #2d2d2d;
+            color: #FFFFFF;
+        }
+
+        body.dark-theme .patient-code-input h2 {
+            color: #FFFFFF;
+        }
+
+        body.dark-theme .patient-code-input p {
+            color: #cccccc;
+        }
+
+        body.dark-theme .input-group input {
+            background-color: #404040;
+            color: #FFFFFF;
+            border-color: #555555;
+        }
+
+        body.dark-theme .card {
+            background-color: #2d2d2d;
+            color: #FFFFFF;
+            border-color: #404040;
+        }
+
+        body.dark-theme .card h3 {
+            color: #FFFFFF;
+            border-bottom-color: #FDB927;
+        }
+
+        body.dark-theme .info-label {
+            color: #cccccc;
+        }
+
+        body.dark-theme .info-value {
+            color: #FFFFFF;
+        }
+
+        body.dark-theme .info-item {
+            border-bottom-color: #404040;
+        }
+
+        body.dark-theme .recommendations-section {
+            background-color: #2d2d2d;
+            color: #FFFFFF;
+            border-color: #404040;
+        }
+
+        body.dark-theme .recommendations-section h2 {
+            color: #FFFFFF;
+        }
+
+        body.dark-theme .treatment-plan {
+            background-color: #404040;
+            color: #FFFFFF;
+        }
+
+        body.dark-theme .treatment-plan h4 {
+            color: #FFFFFF;
+        }
+
+        body.dark-theme .treatment-plan p {
+            color: #cccccc;
+        }
+
+        body.dark-theme .plan-meta {
+            border-top-color: #555555;
+            color: #aaaaaa;
+        }
+
+        .no-data {
+            text-align: center;
+            color: #7f8c8d;
+            font-style: italic;
+            padding: 40px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border: 2px dashed #dee2e6;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #3498db;
+        }
+
+        .loading::after {
+            content: '';
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #3498db;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 1s linear infinite;
+            margin-left: 10px;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border: 1px solid #f5c6cb;
+        }
+
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border: 1px solid #c3e6cb;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .input-group {
+                flex-direction: column;
+            }
+
+            .input-group input {
+                width: 100%;
+            }
+
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header-bar">
+        <div class="header-left">
+            <div class="system-name">GSU Stroke Support System</div>
+        </div>
+        <div class="header-right">
+            <button class="theme-toggle" onclick="toggleTheme()">
+                <span id="theme-icon">🌙</span> Dark Mode
+            </button>
+            <button class="logout-btn" onclick="goHome()">Home</button>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="container">
+            <div class="patient-code-input">
+                <h2>🏥 Patient Dashboard</h2>
+                <p>Enter your patient code to view your medical information and treatment recommendations</p>
+                <div class="input-group">
+                    <input type="text" id="patientCodeInput" placeholder="Enter your patient code" maxlength="20">
+                    <button class="btn" onclick="loadPatientData()">View My Information</button>
+                </div>
+            </div>
+
+        <div id="errorMessage" class="error-message" style="display: none;"></div>
+        <div id="successMessage" class="success-message" style="display: none;"></div>
+
+        <div id="dashboardContent" class="dashboard-content">
+            <div class="dashboard-grid">
+                <!-- Patient Information Card -->
+                <div class="card">
+                    <h3>👤 Personal Information</h3>
+                    <div id="personalInfo">
+                        <div class="loading">Loading personal information...</div>
+                    </div>
+                </div>
+
+                <!-- Vital Signs Card -->
+                <div class="card">
+                    <h3>💓 Vital Signs</h3>
+                    <div id="vitalSigns">
+                        <div class="loading">Loading vital signs...</div>
+                    </div>
+                </div>
+
+                <!-- NIHSS Assessment Card -->
+                <div class="card">
+                    <h3>📊 Stroke Assessment (NIHSS)</h3>
+                    <div id="nihssAssessment">
+                        <div class="loading">Loading assessment...</div>
+                    </div>
+                </div>
+
+                <!-- Scan Results Card -->
+                <div class="card">
+                    <h3>🔬 Scan Results</h3>
+                    <div id="scanResults">
+                        <div class="loading">Loading scan results...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Treatment Recommendations Section -->
+            <div class="recommendations-section">
+                <h2>💊 Treatment Recommendations</h2>
+                <div id="treatmentRecommendations">
+                    <div class="loading">Loading treatment recommendations...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentPatientData = null;
+
+        // Theme toggle functionality
+        function toggleTheme() {
+            const body = document.body;
+            const themeIcon = document.getElementById('theme-icon');
+            
+            if (body.classList.contains('dark-theme')) {
+                body.classList.remove('dark-theme');
+                themeIcon.textContent = '🌙';
+                localStorage.setItem('theme', 'light');
+            } else {
+                body.classList.add('dark-theme');
+                themeIcon.textContent = '☀️';
+                localStorage.setItem('theme', 'dark');
+            }
+        }
+
+        // Load saved theme
+        function loadTheme() {
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'dark') {
+                document.body.classList.add('dark-theme');
+                document.getElementById('theme-icon').textContent = '☀️';
+            }
+        }
+
+        // Go home function
+        function goHome() {
+            window.location.href = '/';
+        }
+
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+            setTimeout(() => {
+                errorDiv.style.display = 'none';
+            }, 5000);
+        }
+
+        function showSuccess(message) {
+            const successDiv = document.getElementById('successMessage');
+            successDiv.textContent = message;
+            successDiv.style.display = 'block';
+            setTimeout(() => {
+                successDiv.style.display = 'none';
+            }, 3000);
+        }
+
+        // Initialize theme on page load
+        document.addEventListener('DOMContentLoaded', loadTheme);
+
+        async function loadPatientData() {
+            const patientCode = document.getElementById('patientCodeInput').value.trim();
+            
+            if (!patientCode) {
+                showError('Please enter your patient code');
+                return;
+            }
+
+            try {
+                showLoading();
+                
+                // Load all patient data in parallel
+                const [patientData, nihssData, scansData, treatmentPlansData] = await Promise.all([
+                    fetchPatientData(patientCode),
+                    fetchNIHSSData(patientCode),
+                    fetchScansData(patientCode),
+                    fetchTreatmentPlans(patientCode)
+                ]);
+
+                currentPatientData = {
+                    patient: patientData,
+                    nihss: nihssData,
+                    scans: scansData,
+                    treatmentPlans: treatmentPlansData
+                };
+
+                displayPatientData();
+                showSuccess('Patient information loaded successfully!');
+                
+            } catch (error) {
+                console.error('Error loading patient data:', error);
+                showError('Failed to load patient information. Please check your patient code and try again.');
+            }
+        }
+
+        function showLoading() {
+            document.getElementById('dashboardContent').style.display = 'block';
+            document.getElementById('personalInfo').innerHTML = '<div class="loading">Loading personal information...</div>';
+            document.getElementById('vitalSigns').innerHTML = '<div class="loading">Loading vital signs...</div>';
+            document.getElementById('nihssAssessment').innerHTML = '<div class="loading">Loading assessment...</div>';
+            document.getElementById('scanResults').innerHTML = '<div class="loading">Loading scan results...</div>';
+            document.getElementById('treatmentRecommendations').innerHTML = '<div class="loading">Loading treatment recommendations...</div>';
+        }
+
+        async function fetchPatientData(patientCode) {
+            const response = await fetch(`/api/patients/${patientCode}`);
+            if (!response.ok) {
+                throw new Error('Patient not found');
+            }
+            return await response.json();
+        }
+
+        async function fetchNIHSSData(patientCode) {
+            try {
+                const response = await fetch(`/api/patients/${patientCode}/nihss`);
+                if (!response.ok) {
+                    return null; // NIHSS assessment might not exist
+                }
+                return await response.json();
+            } catch (error) {
+                return null;
+            }
+        }
+
+        async function fetchScansData(patientCode) {
+            try {
+                const response = await fetch(`/api/patients/${patientCode}/scans`);
+                if (!response.ok) {
+                    return []; // No scans might exist
+                }
+                return await response.json();
+            } catch (error) {
+                return [];
+            }
+        }
+
+        async function fetchTreatmentPlans(patientCode) {
+            try {
+                const response = await fetch(`/api/patients/${patientCode}/treatment-plans`);
+                if (!response.ok) {
+                    return []; // No treatment plans might exist
+                }
+                return await response.json();
+            } catch (error) {
+                return [];
+            }
+        }
+
+        function displayPatientData() {
+            if (!currentPatientData) return;
+
+            displayPersonalInfo();
+            displayVitalSigns();
+            displayNIHSSAssessment();
+            displayScanResults();
+            displayTreatmentRecommendations();
+        }
+
+        function displayPersonalInfo() {
+            const patient = currentPatientData.patient;
+            const personalInfoDiv = document.getElementById('personalInfo');
+            
+            personalInfoDiv.innerHTML = `
+                <div class="info-item">
+                    <span class="info-label">Name:</span>
+                    <span class="info-value">${patient.name}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Age:</span>
+                    <span class="info-value">${patient.age} years</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Gender:</span>
+                    <span class="info-value">${patient.gender}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Patient Code:</span>
+                    <span class="info-value">${patient.code}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Time Since Onset:</span>
+                    <span class="info-value">${patient.time_since_onset || 'Not specified'}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Chief Complaint:</span>
+                    <span class="info-value">${patient.chief_complaint || 'Not specified'}</span>
+                </div>
+            `;
+        }
+
+        function displayVitalSigns() {
+            const patient = currentPatientData.patient;
+            const vitalSignsDiv = document.getElementById('vitalSigns');
+            
+            vitalSignsDiv.innerHTML = `
+                <div class="info-item">
+                    <span class="info-label">Blood Pressure:</span>
+                    <span class="info-value">${patient.systolic_bp || 'N/A'}/${patient.diastolic_bp || 'N/A'} mmHg</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Heart Rate:</span>
+                    <span class="info-value">${patient.heart_rate || 'N/A'} bpm</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Oxygen Saturation:</span>
+                    <span class="info-value">${patient.oxygen_saturation || 'N/A'}%</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Temperature:</span>
+                    <span class="info-value">${patient.temperature || 'N/A'}°F</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Blood Glucose:</span>
+                    <span class="info-value">${patient.glucose || 'N/A'} mg/dL</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Platelet Count:</span>
+                    <span class="info-value">${patient.platelet_count || 'N/A'} K/μL</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">INR:</span>
+                    <span class="info-value">${patient.inr || 'N/A'}</span>
+                </div>
+            `;
+        }
+
+        function displayNIHSSAssessment() {
+            const nihss = currentPatientData.nihss;
+            const nihssDiv = document.getElementById('nihssAssessment');
+            
+            if (!nihss) {
+                nihssDiv.innerHTML = '<div class="no-data">No NIHSS assessment available</div>';
+                return;
+            }
+
+            const severityLevel = getNIHSSSeverity(nihss.total_score);
+            
+            nihssDiv.innerHTML = `
+                <div class="info-item">
+                    <span class="info-label">Total Score:</span>
+                    <span class="info-value" style="font-size: 1.2rem; font-weight: bold; color: ${getNIHSSColor(nihss.total_score)};">${nihss.total_score}/42</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Severity Level:</span>
+                    <span class="info-value">${severityLevel}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Assessment Date:</span>
+                    <span class="info-value">${new Date(nihss.timestamp).toLocaleDateString()}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Consciousness:</span>
+                    <span class="info-value">${nihss.consciousness}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Motor Function (Arms):</span>
+                    <span class="info-value">Left: ${nihss.motor_arm_left}, Right: ${nihss.motor_arm_right}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Motor Function (Legs):</span>
+                    <span class="info-value">Left: ${nihss.motor_leg_left}, Right: ${nihss.motor_leg_right}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Language:</span>
+                    <span class="info-value">${nihss.language}</span>
+                </div>
+            `;
+        }
+
+        function displayScanResults() {
+            const scans = currentPatientData.scans;
+            const scanResultsDiv = document.getElementById('scanResults');
+            
+            if (!scans || scans.length === 0) {
+                scanResultsDiv.innerHTML = '<div class="no-data">No scan results available</div>';
+                return;
+            }
+
+            const latestScan = scans[0]; // Assuming scans are ordered by date
+            
+            scanResultsDiv.innerHTML = `
+                <div class="info-item">
+                    <span class="info-label">Scan Date:</span>
+                    <span class="info-value">${new Date(latestScan.timestamp).toLocaleDateString()}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Prediction:</span>
+                    <span class="info-value">${latestScan.prediction || 'N/A'}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">tPA Eligibility:</span>
+                    <span class="status-badge ${latestScan.eligible ? 'status-eligible' : 'status-not-eligible'}">
+                        ${latestScan.eligible ? 'Eligible' : 'Not Eligible'}
+                    </span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Status:</span>
+                    <span class="status-badge ${getStatusClass(latestScan.status)}">${latestScan.status || 'Pending'}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Doctor Comment:</span>
+                    <span class="info-value">${latestScan.doctor_comment || 'No comments available'}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Eligibility Details:</span>
+                    <span class="info-value">${latestScan.eligibility_result || 'N/A'}</span>
+                </div>
+            `;
+        }
+
+        function displayTreatmentRecommendations() {
+            const treatmentPlans = currentPatientData.treatmentPlans;
+            const recommendationsDiv = document.getElementById('treatmentRecommendations');
+            
+            if (!treatmentPlans || treatmentPlans.length === 0) {
+                recommendationsDiv.innerHTML = '<div class="no-data">No treatment recommendations available yet. Please check back later.</div>';
+                return;
+            }
+
+            let html = '';
+            treatmentPlans.forEach(plan => {
+                html += `
+                    <div class="treatment-plan">
+                        <h4>${plan.plan_type.replace('_', ' ').toUpperCase()} Treatment Plan</h4>
+                        <p><strong>AI-Generated Plan:</strong></p>
+                        <p>${plan.ai_generated_plan || 'No AI-generated plan available'}</p>
+                        ${plan.physician_notes ? `
+                            <p><strong>Physician Notes:</strong></p>
+                            <p>${plan.physician_notes}</p>
+                        ` : ''}
+                        <div class="plan-meta">
+                            <span>Created by: ${plan.created_by || 'System'}</span>
+                            <span>Status: <span class="status-badge ${getStatusClass(plan.status)}">${plan.status}</span></span>
+                        </div>
+                        <div class="plan-meta">
+                            <span>Created: ${new Date(plan.created_at).toLocaleDateString()}</span>
+                            ${plan.updated_at ? `<span>Updated: ${new Date(plan.updated_at).toLocaleDateString()}</span>` : ''}
+                        </div>
+                    </div>
+                `;
+            });
+
+            recommendationsDiv.innerHTML = html;
+        }
+
+        function getNIHSSSeverity(score) {
+            if (score <= 4) return 'Minor Stroke';
+            if (score <= 15) return 'Moderate Stroke';
+            if (score <= 20) return 'Moderate to Severe Stroke';
+            return 'Severe Stroke';
+        }
+
+        function getNIHSSColor(score) {
+            if (score <= 4) return '#27ae60';
+            if (score <= 15) return '#f39c12';
+            if (score <= 20) return '#e67e22';
+            return '#e74c3c';
+        }
+
+        function getStatusClass(status) {
+            switch (status) {
+                case 'eligible': return 'status-eligible';
+                case 'not_eligible': return 'status-not-eligible';
+                case 'pending': return 'status-pending';
+                case 'reviewed': return 'status-reviewed';
+                case 'approved': return 'status-reviewed';
+                default: return 'status-pending';
+            }
+        }
+
+        // Allow Enter key to trigger search
+        document.getElementById('patientCodeInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                loadPatientData();
+            }
+        });
+    </script>
+</body>
+</html>

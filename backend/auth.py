@@ -1,10 +1,15 @@
-from fastapi import APIRouter, Form, Depends, Request
+from fastapi import APIRouter, Form, Depends, Request, HTTPException
 from fastapi.responses import HTMLResponse, RedirectResponse
 from sqlalchemy.orm import Session
-from backend.database import SessionLocal
-from backend.models import User, Patient
+from database import SessionLocal
+from models import User, Patient
+from typing import Optional
+import uuid
 
 router = APIRouter()
+
+# Simple in-memory session store (in production, use Redis or database)
+active_sessions = {}
 
 # Dependency to get DB session
 def get_db():
@@ -13,6 +18,13 @@ def get_db():
         yield db
     finally:
         db.close()
+
+# Helper function to get current user from session
+def get_current_user(request: Request) -> Optional[dict]:
+    session_id = request.cookies.get("session_id")
+    if session_id and session_id in active_sessions:
+        return active_sessions[session_id]
+    return None
 
 # Helper: shared HTML message page
 def message_page(title: str, message: str, link_url: str, link_text: str, color: str = "white", title_color: str = "red") -> HTMLResponse:
@@ -75,18 +87,48 @@ def login(
             <script>alert("Invalid password. Please try again."); window.location.href = "/login-page";</script>
         """, status_code=401)
 
+    # Create session
+    session_id = str(uuid.uuid4())
+    active_sessions[session_id] = {
+        "user_id": user.id,
+        "username": user.username,
+        "role": user.role
+    }
+
+    # Create response with session cookie
     if role == "Patient":
         patient = db.query(Patient).filter_by(linked_user_id=user.id).first()
         if not patient:
             return HTMLResponse(content="""
                 <script>alert("Patient record not found. Please wait for technician upload."); window.location.href = "/login-page";</script>
             """, status_code=404)
-        return RedirectResponse(url=f"/patient-view?code={patient.code}", status_code=302)
-
+        response = RedirectResponse(url=f"/patient-view?code={patient.code}", status_code=302)
     elif role == "Technician":
-        return RedirectResponse(url="/technician-dashboard", status_code=302)
-
+        response = RedirectResponse(url="/technician-dashboard", status_code=302)
     elif role == "Physician":
-        return RedirectResponse(url=f"/physician-dashboard", status_code=302)
+        response = RedirectResponse(url=f"/physician-dashboard", status_code=302)
+    else:
+        return HTMLResponse(content="Unknown role", status_code=400)
 
-    return HTMLResponse(content="Unknown role", status_code=400)
+    # Set session cookie
+    response.set_cookie(key="session_id", value=session_id, httponly=True, max_age=3600)  # 1 hour
+    return response
+
+# 🔍 Get current user information
+@router.get("/current-user")
+def get_current_user_info(request: Request):
+    user_info = get_current_user(request)
+    if not user_info:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    return user_info
+
+# 🚪 Logout
+@router.post("/logout")
+def logout(request: Request):
+    session_id = request.cookies.get("session_id")
+    if session_id and session_id in active_sessions:
+        del active_sessions[session_id]
+    
+    response = RedirectResponse(url="/login-page", status_code=302)
+    response.delete_cookie(key="session_id")
+    return response

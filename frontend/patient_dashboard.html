@@ -409,6 +409,34 @@
             color: #aaaaaa;
         }
 
+        body.dark-theme #welcomeMessage {
+            color: #FFFFFF;
+        }
+
+        .view-details-btn {
+            background-color: #FDB927;
+            color: #000000;
+            font-weight: bold;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 20px auto;
+            display: block;
+        }
+
+        .view-details-btn:hover {
+            background-color: #d4a218;
+            transform: translateY(-2px);
+        }
+
+        body.dark-theme .view-details-btn {
+            background-color: #FDB927;
+            color: #000000;
+        }
+
         .no-data {
             text-align: center;
             color: #7f8c8d;
@@ -417,6 +445,12 @@
             background: #f8f9fa;
             border-radius: 10px;
             border: 2px dashed #dee2e6;
+        }
+
+        body.dark-theme .no-data {
+            background-color: #404040;
+            color: #cccccc;
+            border-color: #555555;
         }
 
         .loading {
@@ -490,10 +524,11 @@
             <div class="system-name">GSU Stroke Support System</div>
         </div>
         <div class="header-right">
+            <span id="welcomeMessage" style="font-weight: bold; color: #000000;"></span>
             <button class="theme-toggle" onclick="toggleTheme()">
                 <span id="theme-icon">🌙</span> Dark Mode
             </button>
-            <button class="logout-btn" onclick="goHome()">Home</button>
+            <button class="logout-btn" onclick="logout()">Logout</button>
         </div>
     </div>
 
@@ -501,10 +536,10 @@
         <div class="container">
             <div class="patient-code-input">
                 <h2>🏥 Patient Dashboard</h2>
-                <p>Enter your patient code to view your medical information and treatment recommendations</p>
+                <p>Your medical information and treatment recommendations are displayed below</p>
                 <div class="input-group">
-                    <input type="text" id="patientCodeInput" placeholder="Enter your patient code" maxlength="20">
-                    <button class="btn" onclick="loadPatientData()">View My Information</button>
+                    <input type="text" id="patientCodeInput" placeholder="Or enter another patient code" maxlength="20">
+                    <button class="btn" onclick="loadPatientData()">Refresh Information</button>
                 </div>
             </div>
 
@@ -553,11 +588,82 @@
                     <div class="loading">Loading treatment recommendations...</div>
                 </div>
             </div>
+
+            <button class="view-details-btn" onclick="scrollToTop()">🔝 Back to Top</button>
         </div>
     </div>
 
     <script>
         let currentPatientData = null;
+        let currentUserInfo = null;
+
+        // Load welcome message and patient data on page load
+        document.addEventListener('DOMContentLoaded', async function() {
+            loadTheme();
+            await loadWelcomeMessage();
+            await loadLoggedInPatientData();
+        });
+
+        // Load welcome message
+        async function loadWelcomeMessage() {
+            try {
+                const response = await fetch('/current-user');
+                if (!response.ok) {
+                    throw new Error('Not authenticated');
+                }
+                currentUserInfo = await response.json();
+                const welcomeMsg = document.getElementById('welcomeMessage');
+                if (welcomeMsg) {
+                    welcomeMsg.textContent = `Welcome, ${currentUserInfo.username}!`;
+                }
+            } catch (error) {
+                console.log('User not logged in - this is normal for patient dashboard access');
+                // Don't redirect - allow unauthenticated access for patient code lookup
+            }
+        }
+
+        // Load patient data for logged-in user
+        async function loadLoggedInPatientData() {
+            try {
+                const response = await fetch('/api/patients/by-user');
+                if (!response.ok) {
+                    throw new Error('Patient data not found');
+                }
+                const patient = await response.json();
+                
+                // Set the patient code input
+                const codeInput = document.getElementById('patientCodeInput');
+                if (codeInput) {
+                    codeInput.value = patient.code;
+                }
+                
+                // Load patient data automatically
+                currentPatientData = {
+                    patient: patient,
+                    nihss: null,
+                    scans: [],
+                    treatmentPlans: []
+                };
+
+                // Fetch all data
+                const [nihssData, scansData, treatmentPlansData] = await Promise.all([
+                    fetchNIHSSData(patient.code).catch(() => null),
+                    fetchScansData(patient.code).catch(() => []),
+                    fetchTreatmentPlans(patient.code).catch(() => [])
+                ]);
+
+                currentPatientData.nihss = nihssData;
+                currentPatientData.scans = scansData;
+                currentPatientData.treatmentPlans = treatmentPlansData;
+
+                displayPatientData();
+                
+            } catch (error) {
+                console.log('No logged-in patient data - users can still enter a code manually');
+                // Don't show error if patient data is not found
+                // Let them manually enter code
+            }
+        }
 
         // Theme toggle functionality
         function toggleTheme() {
@@ -584,9 +690,20 @@
             }
         }
 
-        // Go home function
-        function goHome() {
-            window.location.href = '/';
+        // Logout function
+        async function logout() {
+            try {
+                await fetch('/logout', { method: 'POST' });
+                window.location.href = '/login-page';
+            } catch (error) {
+                console.error('Error logging out:', error);
+                window.location.href = '/login-page';
+            }
+        }
+
+        // Scroll to top function
+        function scrollToTop() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         function showError(message) {
@@ -606,9 +723,6 @@
                 successDiv.style.display = 'none';
             }, 3000);
         }
-
-        // Initialize theme on page load
-        document.addEventListener('DOMContentLoaded', loadTheme);
 
         async function loadPatientData() {
             const patientCode = document.getElementById('patientCodeInput').value.trim();
@@ -701,6 +815,9 @@
         function displayPatientData() {
             if (!currentPatientData) return;
 
+            // Show the dashboard content
+            document.getElementById('dashboardContent').style.display = 'block';
+            
             displayPersonalInfo();
             displayVitalSigns();
             displayNIHSSAssessment();

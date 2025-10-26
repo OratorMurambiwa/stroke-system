@@ -4,8 +4,8 @@ import sys
 import os
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-from backend.database import SessionLocal
-from backend.models import User, Patient
+from database import SessionLocal
+from models import User, Patient
 
 # Create database session
 db = SessionLocal()

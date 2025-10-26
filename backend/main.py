@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, Depends, UploadFile, File, Form
+from fastapi import FastAPI, HTTPException, Depends, UploadFile, File, Form, Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
@@ -26,6 +26,15 @@ app = FastAPI()
 
 # ✅ Create tables after models are imported
 Base.metadata.create_all(bind=engine)
+
+# Helper function to get current user from session (imported from auth module)
+def get_current_user_from_session(request: Request):
+    """Get current user from session cookie"""
+    from auth import active_sessions
+    session_id = request.cookies.get("session_id")
+    if session_id and session_id in active_sessions:
+        return active_sessions[session_id]
+    return None
 
 # Pydantic models for API
 class PatientCreate(BaseModel):
@@ -83,47 +92,47 @@ def serve_home():
 
 @app.get("/login-page")
 def serve_login_page():
-    return FileResponse(os.path.join("frontend", "login.html"))
+    return FileResponse(os.path.join("../frontend", "login.html"))
 
 @app.get("/register-page")
 def serve_register_page():
-    return FileResponse(os.path.join("frontend", "register.html"))
+    return FileResponse(os.path.join("../frontend", "register.html"))
 
 @app.get("/upload-form")
 def serve_upload_form():
-    return FileResponse(os.path.join("frontend", "upload.html"))
+    return FileResponse(os.path.join("../frontend", "upload.html"))
 
 @app.get("/patient-view")
 def serve_patient_view():
-    return FileResponse(os.path.join("frontend", "patient_view.html"))
+    return FileResponse(os.path.join("../frontend", "patient_view.html"))
 
 @app.get("/physician-dashboard")
 def serve_physician_dashboard():
-    return FileResponse(os.path.join("frontend", "physician_dashboard.html"))
+    return FileResponse(os.path.join("../frontend", "physician_dashboard.html"))
 
 @app.get("/view-case")
 def serve_view_case():
-    return FileResponse(os.path.join("frontend", "view_case.html"))
+    return FileResponse(os.path.join("../frontend", "view_case.html"))
 
 @app.get("/technician-dashboard")
 def serve_technician_dashboard():
-    return FileResponse(os.path.join("frontend", "technician_dashboard.html"))
+    return FileResponse(os.path.join("../frontend", "technician_dashboard.html"))
 
 @app.get("/patient-details")
 def serve_patient_details():
-    return FileResponse(os.path.join("frontend", "patient_details.html"))
+    return FileResponse(os.path.join("../frontend", "patient_details.html"))
 
 @app.get("/add-patient")
 def serve_add_patient():
-    return FileResponse(os.path.join("frontend", "add_patient.html"))
+    return FileResponse(os.path.join("../frontend", "add_patient.html"))
 
 @app.get("/patient-vitals")
 def serve_patient_vitals():
-    return FileResponse(os.path.join("frontend", "patient_vitals.html"))
+    return FileResponse(os.path.join("../frontend", "patient_vitals.html"))
 
 @app.get("/nihss-assessment")
 def serve_nihss_assessment():
-    return FileResponse(os.path.join("frontend", "nihss_assessment.html"))
+    return FileResponse(os.path.join("../frontend", "nihss_assessment.html"))
 
 @app.get("/patient-dashboard")
 def serve_patient_dashboard():
@@ -179,6 +188,42 @@ def get_patient_by_code(patient_code: str, db: Session = Depends(get_db)):
         patient = db.query(models.Patient).filter(models.Patient.code == patient_code).first()
         if not patient:
             raise HTTPException(status_code=404, detail="Patient not found")
+        
+        return {
+            "id": patient.id,
+            "code": patient.code,
+            "name": patient.name,
+            "age": patient.age,
+            "gender": patient.gender,
+            "time_since_onset": patient.time_since_onset,
+            "chief_complaint": patient.chief_complaint,
+            "systolic_bp": patient.systolic_bp,
+            "diastolic_bp": patient.diastolic_bp,
+            "heart_rate": patient.heart_rate,
+            "oxygen_saturation": patient.oxygen_saturation,
+            "temperature": patient.temperature,
+            "glucose": patient.glucose,
+            "platelet_count": patient.platelet_count,
+            "inr": patient.inr
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to get patient: {str(e)}")
+
+# API endpoint to get patient data by logged-in user
+@app.get("/api/patients/by-user")
+def get_patient_by_user(request: Request, db: Session = Depends(get_db)):
+    try:
+        # Get current user from session
+        user_info = get_current_user_from_session(request)
+        if not user_info:
+            raise HTTPException(status_code=401, detail="Not authenticated")
+        
+        # Get patient by linked user ID
+        patient = db.query(models.Patient).filter(models.Patient.linked_user_id == user_info['user_id']).first()
+        if not patient:
+            raise HTTPException(status_code=404, detail="No patient record linked to this user")
         
         return {
             "id": patient.id,
